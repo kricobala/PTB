@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kanban de Estudos — Petrobras (Ênfase 16)</title>
+<meta name="description" content="Cronograma e acompanhamento de estudos para o concurso da Petrobras (Engenharia de Petróleo).">
+<meta name="theme-color" content="#020617">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kanban Petrobras">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="styles.css">
+<script id="pb-diag">
+  (function () {
+    function mostrar(msg) {
+      var root = document.getElementById("root");
+      if (!root) return;
+      var vazio = !root.hasChildNodes() || document.getElementById("pb-loading");
+      if (!vazio) return;
+      var box = document.createElement("div");
+      box.style.cssText = "color:#fca5a5;background:#1e1023;padding:24px;font-family:monospace;white-space:pre-wrap;font-size:13px;line-height:1.5";
+      box.textContent = "Erro ao carregar o app:\n" + msg + "\n\nAbra o Console do navegador (F12) para mais detalhes.";
+      root.innerHTML = "";
+      root.appendChild(box);
+    }
+    window.addEventListener("error", function (e) {
+      var msg = (e.error && e.error.message) || e.message || "erro desconhecido";
+      setTimeout(function () { mostrar(msg); }, 250);
+    });
+    setTimeout(function () {
+      var l = document.getElementById("pb-loading");
+      if (l) {
+        l.innerHTML = "Não foi possível iniciar o painel.<br><br>Atualize a página. Se continuar assim, abra o Console (F12) para ver o motivo.";
+      }
+    }, 15000);
+  })();
+</script>
+</head>
+<body>
+<div id="root"><div id="pb-loading" style="color:#64748b;font-family:ui-monospace,monospace;font-size:12px;letter-spacing:.2em;text-transform:uppercase;padding:72px 24px;text-align:center">Carregando painel…</div></div>
+<script src="vendor/react.production.min.js"></script>
+<script src="vendor/react-dom.production.min.js"></script>
+<script src="vendor/prop-types.min.js"></script>
+<script src="vendor/recharts.min.js"></script>
+<script src="sync.js"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script>
+  if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
+    window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+  }
+</script>
+</body>
+</html>
