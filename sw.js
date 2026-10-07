@@ -1,6 +1,6 @@
 /* Service worker: deixa o app funcionar sem internet e SEMPRE buscar a versão nova quando houver conexão.
-   20261007-110611 é trocado a cada build, o que descarta o cache antigo automaticamente. */
-const VERSION = "20261007-110611";
+   20261007-115725 é trocado a cada build, o que descarta o cache antigo automaticamente. */
+const VERSION = "20261007-115725";
 const CACHE = "kanban-petrobras-" + VERSION;
 const CORE = [
   "./", "index.html", "styles.css", "app.js", "data.js", "sync.js", "manifest.json",

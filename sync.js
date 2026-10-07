@@ -25,6 +25,7 @@
   // ---------------- GitHub Gist ----------------
   window.GH_SYNC_ENABLED = true;
   var GIST_FILE = "kanban-petrobras-dados.json";
+  var FOTO_FILE = "kanban-petrobras-foto.json";
   var API = "https://api.github.com/gists";
 
   function cabecalhos(token) {
@@ -72,26 +73,39 @@
       var data = await res.json();
       return data.id;
     },
-    rawPull: async function () {
+    // lê o Gist inteiro: progresso (doc) e foto de inspiração (foto)
+    rawPullAll: async function () {
       var cfg = window.ghSync.getConfig();
-      if (!cfg.token || !cfg.gistId) return null;
+      if (!cfg.token || !cfg.gistId) return { doc: null, foto: null };
       var res = await chamar(API + "/" + cfg.gistId, { headers: cabecalhos(cfg.token), cache: "no-store" });
       var data = await res.json();
-      var file = data.files && data.files[GIST_FILE];
-      if (!file) return null;
-      var texto = file.content;
-      if (file.truncated && file.raw_url) {
-        var r2 = await chamar(file.raw_url, { cache: "no-store" });
-        texto = await r2.text();
+      async function ler(nome, tolerante) {
+        var file = data.files && data.files[nome];
+        if (!file) return null;
+        var texto = file.content;
+        if (file.truncated && file.raw_url) {
+          var r2 = await chamar(file.raw_url, { cache: "no-store" });
+          texto = await r2.text();
+        }
+        if (!texto) return null;
+        try { return JSON.parse(texto); } catch (e) {
+          if (tolerante) return null; // foto corrompida não pode travar a sincronização do progresso
+          throw new Error("O conteúdo do Gist está corrompido.");
+        }
       }
-      if (!texto) return null;
-      try { return JSON.parse(texto); } catch (e) { throw new Error("O conteúdo do Gist está corrompido."); }
+      return { doc: await ler(GIST_FILE, false), foto: await ler(FOTO_FILE, true) };
     },
-    rawPush: async function (doc) {
+    rawPull: async function () {
+      return (await window.ghSync.rawPullAll()).doc;
+    },
+    // grava só o que foi informado: progresso (doc) e/ou foto
+    rawPush: async function (doc, foto) {
       var cfg = window.ghSync.getConfig();
       if (!cfg.token || !cfg.gistId) return;
       var files = {};
-      files[GIST_FILE] = { content: JSON.stringify(doc) };
+      if (doc) files[GIST_FILE] = { content: JSON.stringify(doc) };
+      if (foto) files[FOTO_FILE] = { content: JSON.stringify(foto) };
+      if (!Object.keys(files).length) return;
       await chamar(API + "/" + cfg.gistId, { method: "PATCH", headers: cabecalhos(cfg.token), body: JSON.stringify({ files: files }) });
     },
   };
